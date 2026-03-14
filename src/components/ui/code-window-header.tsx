@@ -20,14 +20,16 @@ const codeWindowDotVariants = tv({
 });
 
 export type CodeWindowHeaderProps = HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof codeWindowHeaderVariants> & {
-    fileName: string;
-  };
+  VariantProps<typeof codeWindowHeaderVariants>;
 
-type CodeWindowDotProps = HTMLAttributes<HTMLSpanElement> &
+type CodeWindowHeaderDotProps = HTMLAttributes<HTMLSpanElement> &
   VariantProps<typeof codeWindowDotVariants>;
 
-const CodeWindowDot = ({ className, tone, ...props }: CodeWindowDotProps) => {
+const CodeWindowHeaderDot = ({
+  className,
+  tone,
+  ...props
+}: CodeWindowHeaderDotProps) => {
   return (
     <span className={codeWindowDotVariants({ tone, className })} {...props} />
   );
@@ -35,16 +37,18 @@ const CodeWindowDot = ({ className, tone, ...props }: CodeWindowDotProps) => {
 
 export const CodeWindowHeader = ({
   className,
-  fileName,
+  children,
   ...props
 }: CodeWindowHeaderProps) => {
   return (
     <div className={codeWindowHeaderVariants({ className })} {...props}>
-      <CodeWindowDot tone="danger" />
-      <CodeWindowDot tone="warning" />
-      <CodeWindowDot tone="success" />
+      <CodeWindowHeaderDot tone="danger" />
+      <CodeWindowHeaderDot tone="warning" />
+      <CodeWindowHeaderDot tone="success" />
       <span className="h-px flex-1 bg-transparent" />
-      <span className="font-mono text-xs text-text-tertiary">{fileName}</span>
+      {children ? (
+        <span className="font-mono text-xs text-text-tertiary">{children}</span>
+      ) : null}
     </div>
   );
 };

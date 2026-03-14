@@ -3,7 +3,9 @@ import {
   CodeBlock,
   CodeWindowHeader,
   Panel,
-  SectionLabel,
+  SectionLabelPrefix,
+  SectionLabelRoot,
+  SectionLabelText,
   StatusBadge,
   TableCell,
   TableRow,
@@ -58,7 +60,7 @@ export default async function HomePage() {
         </section>
 
         <section className="border border-border-primary bg-bg-surface">
-          <CodeWindowHeader fileName="newCode.js" />
+          <CodeWindowHeader>newCode.js</CodeWindowHeader>
           <CodeBlock code={editorCode} lang="javascript" withLineNumbers />
         </section>
 
@@ -85,7 +87,10 @@ export default async function HomePage() {
 
         <section className="flex flex-col gap-5 pb-14">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <SectionLabel label="shame_leaderboard" />
+            <SectionLabelRoot>
+              <SectionLabelPrefix />
+              <SectionLabelText>shame_leaderboard</SectionLabelText>
+            </SectionLabelRoot>
             <Button variant="secondary" size="sm">
               $ view_all &gt;&gt;
             </Button>
@@ -132,10 +137,9 @@ export default async function HomePage() {
           </Panel>
 
           <div className="flex items-center justify-center py-4">
-            <StatusBadge
-              tone="neutral"
-              label="showing top 3 of 2,847 · view full leaderboard >>"
-            />
+            <StatusBadge tone="neutral">
+              showing top 3 of 2,847 · view full leaderboard &gt;&gt;
+            </StatusBadge>
           </div>
         </section>
       </div>

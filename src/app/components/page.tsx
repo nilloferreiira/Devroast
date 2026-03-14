@@ -3,9 +3,14 @@ import {
   CodeBlock,
   CodeWindowHeader,
   DiffLine,
+  DiffLineCode,
+  DiffLinePrefix,
+  DiffLineRoot,
   Panel,
   ScoreRing,
-  SectionLabel,
+  SectionLabelPrefix,
+  SectionLabelRoot,
+  SectionLabelText,
   StatusBadge,
   TableCell,
   TableRow,
@@ -40,7 +45,10 @@ export default async function ComponentsPage() {
         </header>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="buttons" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>buttons</SectionLabelText>
+          </SectionLabelRoot>
           <div className="grid gap-3 sm:grid-cols-3">
             {buttonVariants.map((variant) => (
               <Panel key={variant}>
@@ -65,7 +73,10 @@ export default async function ComponentsPage() {
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="toggle" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>toggle</SectionLabelText>
+          </SectionLabelRoot>
           <Panel className="flex flex-wrap items-center gap-8">
             <Toggle label="roast mode" defaultChecked />
             <Toggle label="roast mode" />
@@ -73,28 +84,40 @@ export default async function ComponentsPage() {
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="badge_status" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>badge_status</SectionLabelText>
+          </SectionLabelRoot>
           <Panel className="flex flex-wrap items-center gap-6">
-            <StatusBadge tone="critical" label="critical" />
-            <StatusBadge tone="warning" label="warning" />
-            <StatusBadge tone="good" label="good" />
-            <StatusBadge tone="critical" label="needs_serious_help" />
+            <StatusBadge tone="critical">critical</StatusBadge>
+            <StatusBadge tone="warning">warning</StatusBadge>
+            <StatusBadge tone="good">good</StatusBadge>
+            <StatusBadge tone="critical">needs_serious_help</StatusBadge>
           </Panel>
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="code_block" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>code_block</SectionLabelText>
+          </SectionLabelRoot>
           <div className="overflow-hidden border border-border-primary bg-bg-surface">
-            <CodeWindowHeader fileName="calculate.js" />
+            <CodeWindowHeader>calculate.js</CodeWindowHeader>
             <CodeBlock code={sampleCode} lang="javascript" withLineNumbers />
           </div>
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="diff_line" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>diff_line</SectionLabelText>
+          </SectionLabelRoot>
           <div className="overflow-hidden border border-border-primary bg-bg-surface">
             <DiffLine tone="removed" code="var total = 0;" />
-            <DiffLine tone="added" code="const total = 0;" />
+            <DiffLineRoot tone="added">
+              <DiffLinePrefix tone="added" />
+              <DiffLineCode>const total = 0;</DiffLineCode>
+            </DiffLineRoot>
             <DiffLine
               tone="context"
               code="for (let i = 0; i < items.length; i++) {"
@@ -103,14 +126,20 @@ export default async function ComponentsPage() {
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="score_ring" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>score_ring</SectionLabelText>
+          </SectionLabelRoot>
           <Panel className="inline-flex w-fit items-center justify-center">
             <ScoreRing score={3.5} />
           </Panel>
         </section>
 
         <section className="flex flex-col gap-5">
-          <SectionLabel label="table_row" />
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>table_row</SectionLabelText>
+          </SectionLabelRoot>
           <Panel spacing="sm" className="p-0">
             <TableRow>
               <TableCell width="rank">#1</TableCell>

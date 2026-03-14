@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
-const sectionLabelVariants = tv({
+const sectionLabelRootVariants = tv({
   base: "inline-flex items-center gap-2 font-mono text-sm font-bold",
   variants: {
     tone: {
@@ -14,23 +14,56 @@ const sectionLabelVariants = tv({
   },
 });
 
-export type SectionLabelProps = HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof sectionLabelVariants> & {
-    label: string;
-  };
+const sectionLabelPrefixVariants = tv({
+  base: "text-accent-green",
+});
 
-export const SectionLabel = ({
+const sectionLabelTextVariants = tv({
+  base: "text-inherit",
+});
+
+export type SectionLabelRootProps = HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof sectionLabelRootVariants>;
+
+export type SectionLabelPrefixProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof sectionLabelPrefixVariants>;
+
+export type SectionLabelTextProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof sectionLabelTextVariants>;
+
+export const SectionLabelRoot = ({
   className,
   tone,
-  label,
   ...props
-}: SectionLabelProps) => {
+}: SectionLabelRootProps) => {
   return (
-    <div className={sectionLabelVariants({ tone, className })} {...props}>
-      <span className="text-accent-green">{"//"}</span>
-      <span>{label}</span>
-    </div>
+    <div className={sectionLabelRootVariants({ tone, className })} {...props} />
   );
 };
 
-export { sectionLabelVariants };
+export const SectionLabelPrefix = ({
+  className,
+  children,
+  ...props
+}: SectionLabelPrefixProps) => {
+  return (
+    <span className={sectionLabelPrefixVariants({ className })} {...props}>
+      {children ?? "//"}
+    </span>
+  );
+};
+
+export const SectionLabelText = ({
+  className,
+  ...props
+}: SectionLabelTextProps) => {
+  return (
+    <span className={sectionLabelTextVariants({ className })} {...props} />
+  );
+};
+
+export {
+  sectionLabelPrefixVariants,
+  sectionLabelRootVariants,
+  sectionLabelTextVariants,
+};

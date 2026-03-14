@@ -19,20 +19,18 @@ const statusBadgeVariants = tv({
 });
 
 export type StatusBadgeProps = HTMLAttributes<HTMLSpanElement> &
-  VariantProps<typeof statusBadgeVariants> & {
-    label: string;
-  };
+  VariantProps<typeof statusBadgeVariants>;
 
 export const StatusBadge = ({
   className,
   tone,
-  label,
+  children,
   ...props
 }: StatusBadgeProps) => {
   return (
     <span className={statusBadgeVariants({ tone, className })} {...props}>
       <StatusDot tone={tone} />
-      <span>{label}</span>
+      <span>{children}</span>
     </span>
   );
 };

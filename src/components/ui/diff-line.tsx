@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
-const diffLineVariants = tv({
+const diffLineRootVariants = tv({
   base: "flex items-center gap-2 px-4 py-2 font-mono text-[13px]",
   variants: {
     tone: {
@@ -15,7 +15,7 @@ const diffLineVariants = tv({
   },
 });
 
-const diffPrefixVariants = tv({
+const diffLinePrefixVariants = tv({
   base: "w-3 text-center",
   variants: {
     tone: {
@@ -35,33 +35,67 @@ const prefixByTone = {
   context: " ",
 } as const;
 
-export type DiffLineProps = HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof diffLineVariants> & {
-    code: string;
-    prefix?: string;
+const diffLineCodeVariants = tv({
+  base: "text-inherit",
+});
+
+export type DiffLineRootProps = HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof diffLineRootVariants>;
+
+export type DiffLinePrefixProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof diffLinePrefixVariants> & {
+    symbol?: string;
   };
 
-export const DiffLine = ({
+export type DiffLineCodeProps = HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof diffLineCodeVariants>;
+
+export const DiffLineRoot = ({
   className,
   tone,
-  code,
-  prefix,
   ...props
-}: DiffLineProps) => {
-  const resolvedTone = tone ?? "context";
-  const resolvedPrefix = prefix ?? prefixByTone[resolvedTone];
-
+}: DiffLineRootProps) => {
   return (
-    <div
-      className={diffLineVariants({ tone: resolvedTone, className })}
-      {...props}
-    >
-      <span className={diffPrefixVariants({ tone: resolvedTone })}>
-        {resolvedPrefix}
-      </span>
-      <span>{code}</span>
-    </div>
+    <div className={diffLineRootVariants({ tone, className })} {...props} />
   );
 };
 
-export { diffLineVariants, diffPrefixVariants };
+export const DiffLinePrefix = ({
+  className,
+  tone,
+  symbol,
+  ...props
+}: DiffLinePrefixProps) => {
+  const resolvedTone = tone ?? "context";
+  const resolvedSymbol = symbol ?? prefixByTone[resolvedTone];
+
+  return (
+    <span
+      className={diffLinePrefixVariants({ tone: resolvedTone, className })}
+      {...props}
+    >
+      {resolvedSymbol}
+    </span>
+  );
+};
+
+export const DiffLineCode = ({ className, ...props }: DiffLineCodeProps) => {
+  return <span className={diffLineCodeVariants({ className })} {...props} />;
+};
+
+export type DiffLineProps = {
+  tone?: VariantProps<typeof diffLineRootVariants>["tone"];
+  code: string;
+  prefix?: string;
+} & Omit<DiffLineRootProps, "tone">;
+
+export const DiffLine = ({ tone, code, prefix, ...props }: DiffLineProps) => {
+  return (
+    <DiffLineRoot tone={tone} {...props}>
+      <DiffLinePrefix tone={tone} symbol={prefix} />
+      <DiffLineCode>{code}</DiffLineCode>
+    </DiffLineRoot>
+  );
+};
+
+export { diffLineCodeVariants, diffLinePrefixVariants, diffLineRootVariants };

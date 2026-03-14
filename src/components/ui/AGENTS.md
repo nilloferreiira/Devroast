@@ -12,6 +12,10 @@ Use this guide for all generic UI components under `src/components/ui`.
 - Do not use string interpolation to append Tailwind classes.
 - For interactive components, use primitives from `@base-ui/react`.
 - For syntax highlight components, keep rendering on the server side only.
+- Prefer composition pattern for UI with internal pieces (header/title/description/prefix/content).
+- Avoid content props like `title`, `description`, `label`, `fileName` when composition is viable.
+- Export each piece as an individual named export (no dot notation API).
+- Keep implementation pragmatic: simple components can keep a single API with `children` instead of forced composition.
 
 ## TypeScript Patterns
 
@@ -26,6 +30,16 @@ Use this guide for all generic UI components under `src/components/ui`.
 - Export the variant generator (e.g. `componentVariants`) when reusable.
 - Keep imports simple and consistent.
 - Prefer exporting component APIs from `src/components/ui/index.ts`.
+
+## Composition Pattern
+
+- Split compound UI into small pieces, for example:
+  - `SomethingRoot`
+  - `SomethingPrefix`
+  - `SomethingText`
+  - `SomethingContent`
+- Keep each piece stylable with its own `tv` variant function when needed.
+- Use direct named imports for pieces instead of `Component.Part` dot notation.
 
 ## Behavior Components
 
