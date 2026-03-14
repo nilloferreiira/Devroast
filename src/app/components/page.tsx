@@ -1,21 +1,25 @@
+import { Button } from "@/components/ui/button";
 import {
-  Button,
-  CodeBlock,
-  CodeWindowHeader,
+  CodeBlockDisplay,
+  CodeBlockHeader,
+  CodeBlockRoot,
+} from "@/components/ui/code-block";
+import {
   DiffLine,
   DiffLineCode,
   DiffLinePrefix,
   DiffLineRoot,
-  Panel,
-  ScoreRing,
+} from "@/components/ui/diff-line";
+import { Panel } from "@/components/ui/panel";
+import { ScoreRing } from "@/components/ui/score-ring";
+import {
   SectionLabelPrefix,
   SectionLabelRoot,
   SectionLabelText,
-  StatusBadge,
-  TableCell,
-  TableRow,
-  Toggle,
-} from "@/components/ui";
+} from "@/components/ui/section-label";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { TableCell, TableRow } from "@/components/ui/table-row";
+import { Toggle } from "@/components/ui/toggle";
 
 const buttonVariants = ["submit", "secondary", "ghost"] as const;
 const buttonSizes = ["sm", "md", "lg"] as const;
@@ -101,10 +105,14 @@ export default async function ComponentsPage() {
             <SectionLabelPrefix />
             <SectionLabelText>code_block</SectionLabelText>
           </SectionLabelRoot>
-          <div className="overflow-hidden border border-border-primary bg-bg-surface">
-            <CodeWindowHeader>calculate.js</CodeWindowHeader>
-            <CodeBlock code={sampleCode} lang="javascript" withLineNumbers />
-          </div>
+          <CodeBlockRoot>
+            <CodeBlockHeader>calculate.js</CodeBlockHeader>
+            <CodeBlockDisplay
+              code={sampleCode}
+              lang="javascript"
+              withLineNumbers
+            />
+          </CodeBlockRoot>
         </section>
 
         <section className="flex flex-col gap-5">

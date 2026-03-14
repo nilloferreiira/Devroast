@@ -29,7 +29,7 @@ Use this guide for all generic UI components under `src/components/ui`.
 - Keep one main component per file when possible.
 - Export the variant generator (e.g. `componentVariants`) when reusable.
 - Keep imports simple and consistent.
-- Prefer exporting component APIs from `src/components/ui/index.ts`.
+- Prefer direct imports from each component file (avoid barrel files).
 
 ## Composition Pattern
 
