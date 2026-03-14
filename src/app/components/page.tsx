@@ -1,9 +1,31 @@
-import { Button } from "@/components/ui/button";
+import {
+  Button,
+  CodeBlock,
+  CodeWindowHeader,
+  DiffLine,
+  Panel,
+  ScoreRing,
+  SectionLabel,
+  StatusBadge,
+  TableCell,
+  TableRow,
+  Toggle,
+} from "@/components/ui";
 
-const variants = ["submit", "secondary", "ghost"] as const;
-const sizes = ["sm", "md", "lg"] as const;
+const buttonVariants = ["submit", "secondary", "ghost"] as const;
+const buttonSizes = ["sm", "md", "lg"] as const;
 
-export default function ComponentsPage() {
+const sampleCode = `function calculateTotal(items) {
+  let total = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    total += items[i].price;
+  }
+
+  return total;
+}`;
+
+export default async function ComponentsPage() {
   return (
     <main className="min-h-screen bg-bg-page px-6 py-10 text-text-primary">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
@@ -13,151 +35,92 @@ export default function ComponentsPage() {
           </p>
           <h1 className="text-3xl font-semibold">Components</h1>
           <p className="text-sm text-text-secondary">
-            Visual gallery for reusable components.
+            Generic and reusable components based on the Pencil library screen.
           </p>
         </header>
 
         <section className="flex flex-col gap-5">
-          <h2 className="font-mono text-lg font-medium">Button Variants</h2>
+          <SectionLabel label="buttons" />
           <div className="grid gap-3 sm:grid-cols-3">
-            {variants.map((variant) => (
-              <div
-                key={variant}
-                className="rounded-xl border border-border-primary bg-bg-surface p-4"
-              >
+            {buttonVariants.map((variant) => (
+              <Panel key={variant}>
                 <p className="mb-4 font-mono text-xs uppercase tracking-wide text-text-secondary">
                   {variant}
                 </p>
                 <Button variant={variant}>$ roast_my_code</Button>
-              </div>
+              </Panel>
             ))}
           </div>
-        </section>
 
-        <section className="flex flex-col gap-5">
-          <h2 className="font-mono text-lg font-medium">Button Sizes</h2>
           <div className="grid gap-3 sm:grid-cols-3">
-            {sizes.map((size) => (
-              <div
-                key={size}
-                className="rounded-xl border border-border-primary bg-bg-surface p-4"
-              >
+            {buttonSizes.map((size) => (
+              <Panel key={size}>
                 <p className="mb-4 font-mono text-xs uppercase tracking-wide text-text-secondary">
                   {size}
                 </p>
                 <Button size={size}>$ roast_my_code</Button>
-              </div>
+              </Panel>
             ))}
           </div>
         </section>
 
         <section className="flex flex-col gap-5">
-          <h2 className="font-mono text-lg font-medium">Button States</h2>
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border-primary bg-bg-surface p-4">
-            <Button>$ roast_my_code</Button>
-            <Button disabled>$ disabled</Button>
+          <SectionLabel label="toggle" />
+          <Panel className="flex flex-wrap items-center gap-8">
+            <Toggle label="roast mode" defaultChecked />
+            <Toggle label="roast mode" />
+          </Panel>
+        </section>
+
+        <section className="flex flex-col gap-5">
+          <SectionLabel label="badge_status" />
+          <Panel className="flex flex-wrap items-center gap-6">
+            <StatusBadge tone="critical" label="critical" />
+            <StatusBadge tone="warning" label="warning" />
+            <StatusBadge tone="good" label="good" />
+            <StatusBadge tone="critical" label="needs_serious_help" />
+          </Panel>
+        </section>
+
+        <section className="flex flex-col gap-5">
+          <SectionLabel label="code_block" />
+          <div className="overflow-hidden border border-border-primary bg-bg-surface">
+            <CodeWindowHeader fileName="calculate.js" />
+            <CodeBlock code={sampleCode} lang="javascript" withLineNumbers />
           </div>
         </section>
 
         <section className="flex flex-col gap-5">
-          <h2 className="font-mono text-lg font-medium">Color Tokens</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-border-primary bg-bg-page p-4">
-              <p className="font-mono text-xs uppercase text-text-tertiary">
-                bg-page
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-surface p-4">
-              <p className="font-mono text-xs uppercase text-text-tertiary">
-                bg-surface
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-elevated p-4">
-              <p className="font-mono text-xs uppercase text-text-tertiary">
-                bg-elevated
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-input p-4">
-              <p className="font-mono text-xs uppercase text-text-tertiary">
-                bg-input
-              </p>
-            </div>
+          <SectionLabel label="diff_line" />
+          <div className="overflow-hidden border border-border-primary bg-bg-surface">
+            <DiffLine tone="removed" code="var total = 0;" />
+            <DiffLine tone="added" code="const total = 0;" />
+            <DiffLine
+              tone="context"
+              code="for (let i = 0; i < items.length; i++) {"
+            />
           </div>
+        </section>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-border-primary bg-bg-surface p-4">
-              <p className="font-mono text-xs uppercase text-text-primary">
-                text-primary
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-surface p-4">
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                text-secondary
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-surface p-4">
-              <p className="font-mono text-xs uppercase text-text-tertiary">
-                text-tertiary
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-bg-surface p-4">
-              <p className="font-mono text-xs uppercase text-primary">
-                primary / primary-foreground
-              </p>
-            </div>
-          </div>
+        <section className="flex flex-col gap-5">
+          <SectionLabel label="score_ring" />
+          <Panel className="inline-flex w-fit items-center justify-center">
+            <ScoreRing score={3.5} />
+          </Panel>
+        </section>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-green" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-green / green-primary
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-red" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-red / destructive
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-amber" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-amber
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-orange" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-orange
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-blue" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-blue
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary p-4">
-              <div className="mb-2 h-8 rounded bg-accent-cyan" />
-              <p className="font-mono text-xs uppercase text-text-secondary">
-                accent-cyan
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-border-primary bg-diff-added p-4">
-              <p className="font-mono text-xs uppercase text-accent-green">
-                diff-added
-              </p>
-            </div>
-            <div className="rounded-xl border border-border-primary bg-diff-removed p-4">
-              <p className="font-mono text-xs uppercase text-accent-red">
-                diff-removed
-              </p>
-            </div>
-          </div>
+        <section className="flex flex-col gap-5">
+          <SectionLabel label="table_row" />
+          <Panel spacing="sm" className="p-0">
+            <TableRow>
+              <TableCell width="rank">#1</TableCell>
+              <TableCell width="score">2.1</TableCell>
+              <TableCell width="code">
+                function calculateTotal(items) {"{"} var total = 0; ...
+              </TableCell>
+              <TableCell width="lang">javascript</TableCell>
+            </TableRow>
+          </Panel>
         </section>
       </div>
     </main>

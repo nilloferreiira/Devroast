@@ -10,6 +10,8 @@ Use this guide for all generic UI components under `src/components/ui`.
   - `className={componentVariants({ variant, size, className })}`
 - Do not use `cn`/`twMerge` together with `tv` for the final component class string.
 - Do not use string interpolation to append Tailwind classes.
+- For interactive components, use primitives from `@base-ui/react`.
+- For syntax highlight components, keep rendering on the server side only.
 
 ## TypeScript Patterns
 
@@ -23,6 +25,19 @@ Use this guide for all generic UI components under `src/components/ui`.
 - Keep one main component per file when possible.
 - Export the variant generator (e.g. `componentVariants`) when reusable.
 - Keep imports simple and consistent.
+- Prefer exporting component APIs from `src/components/ui/index.ts`.
+
+## Behavior Components
+
+- Use Base UI primitives for behavior (`Switch`, `Dialog`, etc).
+- Keep the public wrapper generic and small, then style with `tv`.
+- Prefer controlled + uncontrolled support for form-like components.
+
+## Server-only Components
+
+- Components that call syntax highlighters (`shiki`) must be server components.
+- Do not add `"use client"` in these files.
+- Accept plain data (`code`, `lang`) and render deterministic output.
 
 ## Generic Blueprint
 
