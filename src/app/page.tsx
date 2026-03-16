@@ -1,4 +1,4 @@
-import { CodeEditor } from "@/components/home/code-editor";
+import { EditorPanel } from "@/components/home/editor-panel";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/ui/panel";
 import {
@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/section-label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableCell, TableRow } from "@/components/ui/table-row";
-import { Toggle } from "@/components/ui/toggle";
 import { getLeaderboardRows } from "@/db/queries";
 import type { LeaderboardRow } from "@/db/queries/leaderboard";
 import { highlightCode } from "@/lib/highlight-code";
@@ -22,6 +21,8 @@ const editorCode = `function calculateTotal(items) {
 
   return total;
 }`;
+
+const MAX_CODE_SNIPPET_CHARS = 2000;
 
 const fallbackLeaderboardRows: LeaderboardRow[] = [
   {
@@ -69,23 +70,11 @@ export default async function HomePage() {
           </p>
         </section>
 
-        <CodeEditor
+        <EditorPanel
           initialCode={editorCode}
           initialTokenLines={initialTokenLines}
+          maxChars={MAX_CODE_SNIPPET_CHARS}
         />
-
-        <section className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <Toggle label="roast mode" defaultChecked />
-            <p className="text-xs text-text-tertiary">
-              {"// maximum sarcasm enabled"}
-            </p>
-          </div>
-
-          <Button variant="submit" size="md">
-            $ roast_my_code
-          </Button>
-        </section>
 
         <section className="flex items-center justify-center gap-6 py-1 text-xs text-text-tertiary">
           <span>2,847 codes roasted</span>

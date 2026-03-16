@@ -15,6 +15,8 @@ import { highlightCodeAction } from "./highlight-code-action";
 type CodeEditorProps = {
   initialCode: string;
   initialTokenLines: CodeTokenLinesPayload;
+  maxChars: number;
+  onLimitChange?: (isOverLimit: boolean) => void;
 };
 
 const insertAtCursor = (
@@ -45,6 +47,8 @@ const getLineIndent = (content: string, cursor: number) => {
 export const CodeEditor = ({
   initialCode,
   initialTokenLines,
+  maxChars,
+  onLimitChange,
 }: CodeEditorProps) => {
   const highlightRef = useRef<HTMLPreElement>(null);
   const [code, setCode] = useState(initialCode);
@@ -71,6 +75,8 @@ export const CodeEditor = ({
     languageMode === "auto"
       ? detectedLanguage
       : (manualLanguage ?? detectedLanguage);
+  const characterCount = code.length;
+  const isOverLimit = characterCount > maxChars;
 
   const requestHighlight = useCallback(
     async (nextCode: string, nextLanguage: CodeLanguageOrPlaintext) => {
@@ -107,6 +113,10 @@ export const CodeEditor = ({
 
     requestHighlight(code, effectiveLanguage);
   }, [code, effectiveLanguage, languageMode, requestHighlight]);
+
+  useEffect(() => {
+    onLimitChange?.(isOverLimit);
+  }, [isOverLimit, onLimitChange]);
 
   return (
     <CodeBlockRoot>
@@ -228,10 +238,16 @@ export const CodeEditor = ({
         />
 
         {isHighlighting ? (
-          <div className="pointer-events-none absolute bottom-0 right-0 z-20 border-l border-t border-border-primary bg-bg-surface/90 px-3 py-1.5 font-mono text-[11px] text-text-tertiary">
+          <div className="pointer-events-none absolute bottom-0 left-0 z-20 border-r border-t border-border-primary bg-bg-surface/90 px-3 py-1.5 font-mono text-[11px] text-text-tertiary">
             updating highlight...
           </div>
         ) : null}
+
+        <div className="pointer-events-none absolute bottom-0 right-0 z-20 border-l border-t border-border-primary bg-bg-surface/90 px-3 py-1.5 font-mono text-[11px] text-text-tertiary">
+          <span className={isOverLimit ? "text-accent-red" : undefined}>
+            {characterCount} / {maxChars}
+          </span>
+        </div>
       </div>
     </CodeBlockRoot>
   );
