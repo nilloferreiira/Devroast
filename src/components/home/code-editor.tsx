@@ -233,7 +233,7 @@ export const CodeEditor = ({
           }}
           spellCheck={false}
           wrap="off"
-          className="relative z-10 min-h-[280px] w-full resize-none bg-transparent p-4 font-mono text-[13px] leading-6 text-transparent caret-text-primary outline-none placeholder:text-text-tertiary selection:bg-accent-green/30"
+          className="relative z-10 min-h-70 w-full resize-none bg-transparent p-4 font-mono text-[13px] leading-6 text-transparent caret-text-primary outline-none placeholder:text-text-tertiary selection:bg-accent-green/30"
           placeholder="Paste your code here..."
         />
 
