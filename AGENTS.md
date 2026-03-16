@@ -18,6 +18,30 @@
 - Use Tailwind + `tailwind-variants` for styles and variants.
 - Avoid class string interpolation for Tailwind class composition.
 
+## Feature Workflow
+
+- Before implementing a new feature, create a spec in `specs/` following `specs/AGENTS.md`.
+- Keep implementation scope tight to what the spec/request asks for.
+- Avoid broad migrations when a small vertical slice is requested.
+
+## API Layer Patterns (tRPC + Next App Router)
+
+- tRPC is the API layer pattern for app data access.
+- Prefer RSC-first data fetching:
+  - prefetch in Server Components
+  - hydrate with React Query hydration boundary
+  - consume in Client Components with Suspense hooks when needed
+- Keep endpoint mounted at `/api/trpc`.
+- Keep routers domain-oriented and explicit (example: `homepageMetrics`).
+- Keep DB logic in query modules and expose them through tRPC procedures.
+- For procedures without input, avoid unnecessary validation boilerplate.
+
+## Home Metrics Pattern
+
+- Homepage metrics should come from tRPC (`homepageMetrics.summary`).
+- If a metric requires count-up animation, use `@number-flow/react` in a Client Component.
+- Prefer a Server Component wrapper that handles prefetch + hydration, then render a Suspense client consumer.
+
 ## Styling Conventions
 
 - Theme tokens are defined in `src/app/globals.css`.

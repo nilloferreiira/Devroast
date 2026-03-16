@@ -10,10 +10,10 @@ const HomeMetricsFallback = () => {
   );
 };
 
-const HomeMetricsPrefetch = () => {
+const HomeMetricsPrefetch = async () => {
   const queryClient = getQueryClient();
 
-  void queryClient.prefetchQuery(trpc.homepageMetrics.summary.queryOptions());
+  await queryClient.prefetchQuery(trpc.homepageMetrics.summary.queryOptions());
 
   return <HomeMetricsClient />;
 };

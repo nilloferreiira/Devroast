@@ -44,6 +44,7 @@ Use this guide for all generic UI components under `src/components/ui`.
 ## Behavior Components
 
 - Use Base UI primitives for behavior (`Switch`, `Dialog`, etc).
+- For collapsible/disclosure behavior, prefer `@base-ui/react/collapsible`.
 - Keep the public wrapper generic and small, then style with `tv`.
 - Prefer controlled + uncontrolled support for form-like components.
 
