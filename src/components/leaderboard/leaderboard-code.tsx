@@ -13,7 +13,7 @@ const codePanelVariants = tv({
   variants: {
     expanded: {
       false: "max-h-[84px]",
-      true: "max-h-[640px]",
+      true: "max-h-none",
     },
   },
   defaultVariants: {
