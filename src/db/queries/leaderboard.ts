@@ -91,7 +91,7 @@ export const getPaginatedLeaderboardSummary = async (
   const db = getDb();
   const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
   const safePerPage = Number.isFinite(perPage)
-    ? Math.max(1, Math.floor(perPage))
+    ? Math.min(100, Math.max(1, Math.floor(perPage)))
     : 20;
   const offset = (safePage - 1) * safePerPage;
   const leaderboardFilter = and(
