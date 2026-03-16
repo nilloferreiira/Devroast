@@ -1,9 +1,5 @@
+import { CodeEditor } from "@/components/home/code-editor";
 import { Button } from "@/components/ui/button";
-import {
-  CodeBlockDisplay,
-  CodeBlockHeader,
-  CodeBlockRoot,
-} from "@/components/ui/code-block";
 import { Panel } from "@/components/ui/panel";
 import {
   SectionLabelPrefix,
@@ -13,6 +9,9 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableCell, TableRow } from "@/components/ui/table-row";
 import { Toggle } from "@/components/ui/toggle";
+import { getLeaderboardRows } from "@/db/queries";
+import type { LeaderboardRow } from "@/db/queries/leaderboard";
+import { highlightCode } from "@/lib/highlight-code";
 
 const editorCode = `function calculateTotal(items) {
   let total = 0;
@@ -24,7 +23,7 @@ const editorCode = `function calculateTotal(items) {
   return total;
 }`;
 
-const leaderboardRows = [
+const fallbackLeaderboardRows: LeaderboardRow[] = [
   {
     rank: "#1",
     score: "2.1",
@@ -43,9 +42,18 @@ const leaderboardRows = [
     preview: "while(true){ doWork(); } // no escape",
     lang: "python",
   },
-] as const;
+];
 
 export default async function HomePage() {
+  const initialTokenLines = await highlightCode(editorCode, "javascript");
+  let leaderboardRows: LeaderboardRow[] = fallbackLeaderboardRows;
+
+  try {
+    leaderboardRows = await getLeaderboardRows(3);
+  } catch {
+    leaderboardRows = fallbackLeaderboardRows;
+  }
+
   return (
     <main className="min-h-[calc(100vh-56px)] bg-bg-page px-6 pb-0 pt-20 text-text-primary md:px-10">
       <div className="mx-auto flex w-full max-w-240 flex-col gap-8">
@@ -61,14 +69,10 @@ export default async function HomePage() {
           </p>
         </section>
 
-        <CodeBlockRoot>
-          <CodeBlockHeader>newCode.js</CodeBlockHeader>
-          <CodeBlockDisplay
-            code={editorCode}
-            lang="javascript"
-            withLineNumbers
-          />
-        </CodeBlockRoot>
+        <CodeEditor
+          initialCode={editorCode}
+          initialTokenLines={initialTokenLines}
+        />
 
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">

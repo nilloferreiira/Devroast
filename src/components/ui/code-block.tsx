@@ -1,6 +1,8 @@
 import type { HTMLAttributes, TextareaHTMLAttributes } from "react";
 import { codeToTokens } from "shiki";
 import { tv, type VariantProps } from "tailwind-variants";
+import type { CodeTokenLinesPayload } from "@/lib/code-highlight";
+import type { CodeLanguageOrPlaintext } from "@/lib/code-languages";
 
 const codeBlockRootVariants = tv({
   base: "overflow-hidden border border-border-primary bg-bg-surface",
@@ -36,14 +38,6 @@ const codeBlockEditorVariants = tv({
   base: "min-h-[200px] w-full resize-none border-0 bg-bg-surface p-4 font-mono text-[13px] leading-6 text-text-primary outline-none placeholder:text-text-tertiary",
 });
 
-type CodeLanguage =
-  | "javascript"
-  | "typescript"
-  | "tsx"
-  | "jsx"
-  | "json"
-  | "bash";
-
 export type CodeBlockRootProps = HTMLAttributes<HTMLDivElement> &
   VariantProps<typeof codeBlockRootVariants>;
 
@@ -55,8 +49,15 @@ type CodeBlockHeaderDotProps = HTMLAttributes<HTMLSpanElement> &
 
 export type CodeBlockDisplayProps = HTMLAttributes<HTMLPreElement> &
   VariantProps<typeof codeBlockDisplayVariants> & {
-    code: string;
-    lang?: CodeLanguage;
+    code?: string;
+    tokenLines?: CodeTokenLinesPayload;
+    lang?: CodeLanguageOrPlaintext;
+    withLineNumbers?: boolean;
+  };
+
+export type CodeBlockTokenDisplayProps = HTMLAttributes<HTMLPreElement> &
+  VariantProps<typeof codeBlockDisplayVariants> & {
+    tokenLines: CodeTokenLinesPayload;
     withLineNumbers?: boolean;
   };
 
@@ -101,15 +102,34 @@ export const CodeBlockHeader = ({
 export const CodeBlockDisplay = async ({
   className,
   code,
+  tokenLines,
   lang = "javascript",
   withLineNumbers = false,
   ...props
 }: CodeBlockDisplayProps) => {
-  const tokenLines = await codeToTokens(code, {
-    lang,
-    theme: "vesper",
-  });
+  const resolvedTokenLines =
+    tokenLines ??
+    (await codeToTokens(code ?? "", {
+      lang,
+      theme: "vesper",
+    }));
 
+  return (
+    <CodeBlockTokenDisplay
+      className={className}
+      tokenLines={resolvedTokenLines}
+      withLineNumbers={withLineNumbers}
+      {...props}
+    />
+  );
+};
+
+export const CodeBlockTokenDisplay = ({
+  className,
+  tokenLines,
+  withLineNumbers = false,
+  ...props
+}: CodeBlockTokenDisplayProps) => {
   return (
     <pre className={codeBlockDisplayVariants({ className })} {...props}>
       {tokenLines.tokens.map((line, lineIndex) => {
