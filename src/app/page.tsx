@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { EditorPanel } from "@/components/home/editor-panel";
 import { HomeMetrics } from "@/components/home/home-metrics";
 import { HomeShameLeaderboard } from "@/components/home/home-shame-leaderboard";
@@ -16,6 +17,9 @@ const editorCode = `function calculateTotal(items) {
 const MAX_CODE_SNIPPET_CHARS = 2000;
 
 export default async function HomePage() {
+  "use cache";
+  cacheLife("hours");
+
   const initialTokenLines = await highlightCode(editorCode, "javascript");
 
   return (

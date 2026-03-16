@@ -1,10 +1,9 @@
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { LeaderboardCode } from "@/components/leaderboard/leaderboard-code";
 import { CodeBlockDisplay } from "@/components/ui/code-block";
 import { Panel } from "@/components/ui/panel";
 import { caller } from "@/trpc/server";
-
-export const dynamic = "force-dynamic";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -36,6 +35,13 @@ const toPositiveInt = (value: string | undefined, fallback: number) => {
   return parsedValue;
 };
 
+const getLeaderboardData = async (page: number, perPage: number) => {
+  "use cache";
+  cacheLife("hours");
+
+  return caller.leaderboard.page({ page, perPage });
+};
+
 export default async function LeaderboardPage({
   searchParams,
 }: LeaderboardPageProps) {
@@ -49,7 +55,7 @@ export default async function LeaderboardPage({
     requestedPerPage === LEADERBOARD_PER_PAGE
       ? requestedPerPage
       : LEADERBOARD_PER_PAGE;
-  const { rows, pagination } = await caller.leaderboard.page({ page, perPage });
+  const { rows, pagination } = await getLeaderboardData(page, perPage);
 
   const codeBlocks = await Promise.all(
     rows.map((row) =>

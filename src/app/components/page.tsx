@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Button } from "@/components/ui/button";
 import {
   CodeBlockDisplay,
@@ -35,6 +36,8 @@ const sampleCode = `function calculateTotal(items) {
 }`;
 
 export default async function ComponentsPage() {
+  await connection();
+
   return (
     <main className="min-h-screen bg-bg-page px-6 py-10 text-text-primary">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
