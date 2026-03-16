@@ -41,10 +41,14 @@ export default async function LeaderboardPage({
 }: LeaderboardPageProps) {
   const resolvedSearchParams = await searchParams;
   const page = toPositiveInt(toSingleValue(resolvedSearchParams?.page), 1);
-  const perPage = toPositiveInt(
+  const requestedPerPage = toPositiveInt(
     toSingleValue(resolvedSearchParams?.perPage),
     LEADERBOARD_PER_PAGE,
   );
+  const perPage =
+    requestedPerPage === LEADERBOARD_PER_PAGE
+      ? requestedPerPage
+      : LEADERBOARD_PER_PAGE;
   const { rows, pagination } = await caller.leaderboard.page({ page, perPage });
 
   const codeBlocks = await Promise.all(
@@ -58,8 +62,9 @@ export default async function LeaderboardPage({
     ),
   );
 
-  const previousHref = `?page=${Math.max(1, pagination.page - 1)}&perPage=${LEADERBOARD_PER_PAGE}`;
-  const nextHref = `?page=${Math.max(1, pagination.page + 1)}&perPage=${LEADERBOARD_PER_PAGE}`;
+  const perPageParam = pagination.perPage;
+  const previousHref = `?page=${Math.max(1, pagination.page - 1)}&perPage=${perPageParam}`;
+  const nextHref = `?page=${Math.max(1, pagination.page + 1)}&perPage=${perPageParam}`;
 
   return (
     <main className="min-h-[calc(100vh-56px)] bg-bg-page px-6 pb-14 pt-10 text-text-primary md:px-10">
