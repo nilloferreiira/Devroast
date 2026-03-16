@@ -109,7 +109,9 @@ export default async function LeaderboardPage({
                   </div>
                 </div>
 
-                <LeaderboardCode>{codeBlocks[index]}</LeaderboardCode>
+                <LeaderboardCode canExpand={row.code.includes("\n")}>
+                  {codeBlocks[index]}
+                </LeaderboardCode>
               </Panel>
             ))
           )}

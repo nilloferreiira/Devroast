@@ -27,10 +27,18 @@ const codeFadeVariants = tv({
 
 export type LeaderboardCodeProps = {
   children: React.ReactNode;
+  canExpand?: boolean;
 };
 
-export const LeaderboardCode = ({ children }: LeaderboardCodeProps) => {
+export const LeaderboardCode = ({
+  children,
+  canExpand = true,
+}: LeaderboardCodeProps) => {
   const [open, setOpen] = useState(false);
+
+  if (!canExpand) {
+    return <div className="pb-3">{children}</div>;
+  }
 
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
@@ -39,9 +47,11 @@ export const LeaderboardCode = ({ children }: LeaderboardCodeProps) => {
         {!open ? <div className={codeFadeVariants()} /> : null}
       </div>
 
-      <Collapsible.Trigger className={codeToggleVariants()}>
-        {open ? "show less" : "show more"}
-      </Collapsible.Trigger>
+      <div className="px-5 pb-3">
+        <Collapsible.Trigger className={codeToggleVariants()}>
+          {open ? "show less" : "show more"}
+        </Collapsible.Trigger>
+      </div>
     </Collapsible.Root>
   );
 };
