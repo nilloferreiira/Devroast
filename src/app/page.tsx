@@ -1,4 +1,5 @@
 import { EditorPanel } from "@/components/home/editor-panel";
+import { HomeMetrics } from "@/components/home/home-metrics";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/ui/panel";
 import {
@@ -76,11 +77,7 @@ export default async function HomePage() {
           maxChars={MAX_CODE_SNIPPET_CHARS}
         />
 
-        <section className="flex items-center justify-center gap-6 py-1 text-xs text-text-tertiary">
-          <span>2,847 codes roasted</span>
-          <span className="font-mono">·</span>
-          <span>avg score: 4.2/10</span>
-        </section>
+        <HomeMetrics />
 
         <section className="h-10" />
 
