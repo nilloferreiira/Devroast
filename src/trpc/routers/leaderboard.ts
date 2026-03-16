@@ -26,7 +26,9 @@ const toNormalizedPage = (value: unknown): number => {
 
     const numericValue = Number(trimmedValue);
 
-    return Number.isInteger(numericValue) && numericValue >= 1 ? numericValue : 1;
+    return Number.isInteger(numericValue) && numericValue >= 1
+      ? numericValue
+      : 1;
   }
 
   return 1;

@@ -1,7 +1,7 @@
-import { CodeBlockDisplay } from "@/components/ui/code-block";
-import { Panel } from "@/components/ui/panel";
 import Link from "next/link";
 import { LeaderboardCode } from "@/components/leaderboard/leaderboard-code";
+import { CodeBlockDisplay } from "@/components/ui/code-block";
+import { Panel } from "@/components/ui/panel";
 import { caller } from "@/trpc/server";
 
 export const dynamic = "force-dynamic";
@@ -91,11 +91,16 @@ export default async function LeaderboardPage({
             </Panel>
           ) : (
             rows.map((row, index) => (
-              <Panel key={`${row.rank}-${row.lang}-${row.code.slice(0, 16)}`} className="overflow-hidden p-0">
+              <Panel
+                key={`${row.rank}-${row.lang}-${row.code.slice(0, 16)}`}
+                className="overflow-hidden p-0"
+              >
                 <div className="flex h-12 items-center justify-between border-b border-border-primary px-5 font-mono text-xs">
                   <div className="flex items-center gap-6">
                     <span className="text-text-tertiary">{row.rank}</span>
-                    <span className="font-bold text-accent-red">{row.score}</span>
+                    <span className="font-bold text-accent-red">
+                      {row.score}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-text-tertiary">
@@ -118,7 +123,9 @@ export default async function LeaderboardPage({
                 previous
               </Link>
             ) : (
-              <span className="inline-flex items-center text-text-muted">previous</span>
+              <span className="inline-flex items-center text-text-muted">
+                previous
+              </span>
             )}
 
             <span>{`page ${pagination.page} of ${pagination.totalPages}`}</span>
@@ -131,7 +138,9 @@ export default async function LeaderboardPage({
                 next
               </Link>
             ) : (
-              <span className="inline-flex items-center text-text-muted">next</span>
+              <span className="inline-flex items-center text-text-muted">
+                next
+              </span>
             )}
           </div>
         </section>

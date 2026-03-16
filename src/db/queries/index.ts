@@ -1,9 +1,9 @@
+export type { PaginatedLeaderboardSummary } from "@/db/queries/leaderboard";
 export {
-  getPaginatedLeaderboardSummary,
   getHomepageShameLeaderboardSummary,
   getLeaderboardRows,
+  getPaginatedLeaderboardSummary,
 } from "@/db/queries/leaderboard";
-export type { PaginatedLeaderboardSummary } from "@/db/queries/leaderboard";
 export { getHomepageMetrics } from "@/db/queries/metrics";
 export {
   getCompletedRoastBundleBySubmissionId,
