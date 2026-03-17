@@ -54,7 +54,7 @@ export async function generateMetadata({
   if (!roast || roast.status !== "completed") return {};
 
   const score = Number(roast.score ?? 0);
-  const title = `DevRoast: ${score}/10 — ${roast.verdict}`;
+  const title = `DevRoast: ${score}/10 — ${roast.verdict ?? "unknown"}`;
   const description = roast.summaryQuote ?? "Code has been roasted.";
   const ogImageUrl = `${getBaseUrl()}/api/og/${roastId}`;
 
