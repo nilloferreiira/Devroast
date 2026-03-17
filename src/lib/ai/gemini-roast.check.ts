@@ -1,9 +1,9 @@
-import {
-  type RoastAdapterErrorCategory,
-  RoastAdapterError,
-  generateRoastAnalysis,
-} from "./gemini-roast";
 import { AI_TIMEOUT_MS } from "@/lib/roast-contract";
+import {
+  generateRoastAnalysis,
+  RoastAdapterError,
+  type RoastAdapterErrorCategory,
+} from "./gemini-roast";
 
 const assert = (condition: unknown, message: string) => {
   if (!condition) {
@@ -24,7 +24,10 @@ const assertRejectsAdapterCategory = async (
     captured = error;
   }
 
-  assert(captured instanceof RoastAdapterError, `${message}: typed error expected`);
+  assert(
+    captured instanceof RoastAdapterError,
+    `${message}: typed error expected`,
+  );
   assert(
     (captured as RoastAdapterError).category === expectedCategory,
     `${message}: expected ${expectedCategory}`,
@@ -54,7 +57,10 @@ const run = async () => {
     },
   );
 
-  assert(normalCallInputs.length === 1, "normal mode should call provider once");
+  assert(
+    normalCallInputs.length === 1,
+    "normal mode should call provider once",
+  );
   assert(
     normalCallInputs[0]?.prompt.includes("serious and objective"),
     "normal mode prompt should request serious/objective tone",

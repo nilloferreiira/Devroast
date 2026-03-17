@@ -2,13 +2,13 @@ import {
   AI_TIMEOUT_MS,
   diffLineTypeValues,
   issueSeverityValues,
+  type NormalizedRoastOutput,
   normalizeRoastAiOutput,
   roastAiRawOutputSchema,
   roastAiRequiredFieldList,
   roastCreateOutputSchema,
   roastModeValues,
   roastVerdictValues,
-  type NormalizedRoastOutput,
 } from "@/lib/roast-contract";
 
 export type RoastAdapterErrorCategory =
@@ -34,9 +34,7 @@ export class RoastAdapterError extends Error {
 
 export type GeminiRoastAdapterError = RoastAdapterError;
 
-export const mapUnknownProviderError = (
-  error: unknown,
-): RoastAdapterError => {
+export const mapUnknownProviderError = (error: unknown): RoastAdapterError => {
   if (error instanceof RoastAdapterError) {
     return error;
   }
@@ -59,7 +57,11 @@ export const mapUnknownProviderError = (
       );
     }
 
-    return new RoastAdapterError("provider_error", "Model request failed", error);
+    return new RoastAdapterError(
+      "provider_error",
+      "Model request failed",
+      error,
+    );
   }
 
   return new RoastAdapterError("provider_error", "Model request failed", error);
@@ -202,7 +204,10 @@ export const generateRoastAnalysis = async (
     language: string;
   },
   deps?: {
-    callModel: (input: { prompt: string; timeoutMs: number }) => Promise<string>;
+    callModel: (input: {
+      prompt: string;
+      timeoutMs: number;
+    }) => Promise<string>;
   },
 ): Promise<NormalizedRoastOutput> => {
   const callModel = deps?.callModel ?? callGeminiModel;
