@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ShareButton } from "@/components/roast/share-button";
 import { CodeBlockDisplay } from "@/components/ui/code-block";
 import { DiffLine } from "@/components/ui/diff-line";
 import { Panel } from "@/components/ui/panel";
@@ -128,6 +129,10 @@ export default async function RoastResultPage({
               <span>{`lang: ${roast.language}`}</span>
               <span>·</span>
               <span>{`${sourceLineCount} lines`}</span>
+            </div>
+
+            <div>
+              <ShareButton roastId={roastId} />
             </div>
           </div>
         </section>
