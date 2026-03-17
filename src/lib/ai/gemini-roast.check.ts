@@ -118,6 +118,24 @@ const run = async () => {
           language: "typescript",
         },
         {
+          callModel: async () => {
+            throw new Error("Gemini request failed with status 404");
+          },
+        },
+      ),
+    "provider_error",
+    "non-timeout provider failures should be provider_error",
+  );
+
+  await assertRejectsAdapterCategory(
+    () =>
+      generateRoastAnalysis(
+        {
+          code: "const value = 1;",
+          roastMode: "normal",
+          language: "typescript",
+        },
+        {
           callModel: async () => "{bad json",
         },
       ),
