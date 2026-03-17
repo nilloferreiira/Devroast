@@ -22,11 +22,15 @@ const languageValues = codeLanguageEnum.enumValues;
 export const normalizeLanguageOrPlaintext = (
   language: string | null | undefined,
 ): (typeof languageValues)[number] => {
-  if (!language) {
+  if (language == null) {
     return "plaintext";
   }
 
-  const normalized = language.toLowerCase();
+  const normalized = language.trim().toLowerCase();
+  if (!normalized) {
+    return "plaintext";
+  }
+
   return languageValues.includes(normalized as (typeof languageValues)[number])
     ? (normalized as (typeof languageValues)[number])
     : "plaintext";
@@ -95,10 +99,13 @@ export const normalizeDiffLineList = (
 };
 
 export const roastCreateInputSchema = z.object({
-  code: z.string().min(1).max(MAX_CODE_CHARS),
+  code: z
+    .string()
+    .refine((value) => value.trim().length > 0, "Code is required")
+    .max(MAX_CODE_CHARS),
   roastMode: z.enum(roastModeEnum.enumValues),
   language: z
-    .string()
+    .union([z.string(), z.null()])
     .optional()
     .transform((language) => normalizeLanguageOrPlaintext(language)),
 });

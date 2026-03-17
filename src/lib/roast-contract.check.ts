@@ -9,8 +9,10 @@ import {
   normalizeDiffLineList,
   normalizeIssueList,
   normalizeLanguageOrPlaintext,
+  normalizeRoastAiOutput,
   normalizeScore,
   roastCreateInputSchema,
+  roastCreateOutputSchema,
   truncateToMaxLength,
 } from "./roast-contract";
 
@@ -41,6 +43,10 @@ const run = () => {
     normalizeLanguageOrPlaintext(undefined) === "plaintext",
     "missing language maps to plaintext",
   );
+  assert(
+    normalizeLanguageOrPlaintext(" typescript ") === "typescript",
+    "language normalization trims before lowercase",
+  );
 
   assertThrows(
     () =>
@@ -50,6 +56,16 @@ const run = () => {
         language: "typescript",
       }),
     "empty code is rejected",
+  );
+
+  assertThrows(
+    () =>
+      roastCreateInputSchema.parse({
+        code: "\n  \t ",
+        roastMode: "roast",
+        language: "typescript",
+      }),
+    "whitespace-only code is rejected",
   );
 
   assertThrows(
@@ -75,6 +91,15 @@ const run = () => {
   assert(
     parsedInput.language === "plaintext",
     "input parser normalizes invalid language to plaintext",
+  );
+  const parsedInputWithNullLanguage = roastCreateInputSchema.parse({
+    code: codeWithSpaces,
+    roastMode: "normal",
+    language: null,
+  });
+  assert(
+    parsedInputWithNullLanguage.language === "plaintext",
+    "input parser normalizes null language to plaintext",
   );
 
   assert(normalizeScore(-3) === 0, "score clamps to min");
@@ -137,6 +162,38 @@ const run = () => {
     }),
   );
   issueSchemaCheck.parse(issueList);
+
+  const normalizedOutput = normalizeRoastAiOutput({
+    score: 11.25,
+    verdict: "needs_work",
+    summaryQuote: "Q".repeat(500),
+    analysisSummary: "S".repeat(2600),
+    issues: [
+      {
+        severity: "critical",
+        title: "T".repeat(200),
+        description: "D".repeat(2600),
+      },
+      {
+        severity: "good",
+        title: "Looks good",
+        description: "Keep this pattern.",
+        order: 99,
+      },
+    ],
+    diffLines: [
+      {
+        lineType: "removed",
+        content: "-".repeat(700),
+      },
+      {
+        lineType: "added",
+        content: "+ const improved = true;",
+        order: 4,
+      },
+    ],
+  });
+  roastCreateOutputSchema.parse(normalizedOutput);
 
   console.log("PASS roast-contract checks");
 };
