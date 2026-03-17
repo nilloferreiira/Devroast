@@ -28,6 +28,21 @@ const logRoastCreate = (
   console.info(event, metadata);
 };
 
+const safeMarkRoastAsFailed = async (input: {
+  roastId: string;
+  errorMessage: string;
+  category: "db_commit" | "adapter_error" | "unexpected_error";
+}) => {
+  try {
+    await markRoastAsFailed(input.roastId, input.errorMessage);
+  } catch {
+    console.warn("roast.create.failure_persist_warning", {
+      roastId: input.roastId,
+      category: input.category,
+    });
+  }
+};
+
 export const roastRouter = createTRPCRouter({
   create: baseProcedure
     .input(roastCreateInputSchema)
@@ -72,7 +87,11 @@ export const roastRouter = createTRPCRouter({
             roastId,
           });
 
-          await markRoastAsFailed(roastId, INTERNAL_RETRY_SAFE_MESSAGE);
+          await safeMarkRoastAsFailed({
+            roastId,
+            errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
+            category: "db_commit",
+          });
           throw error;
         }
 
@@ -88,7 +107,11 @@ export const roastRouter = createTRPCRouter({
 
         if (error instanceof RoastAdapterError) {
           if (roastId) {
-            await markRoastAsFailed(roastId, INTERNAL_RETRY_SAFE_MESSAGE);
+            await safeMarkRoastAsFailed({
+              roastId,
+              errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
+              category: "adapter_error",
+            });
           }
 
           const adapterEvent =
@@ -117,7 +140,11 @@ export const roastRouter = createTRPCRouter({
         }
 
         if (roastId) {
-          await markRoastAsFailed(roastId, INTERNAL_RETRY_SAFE_MESSAGE);
+          await safeMarkRoastAsFailed({
+            roastId,
+            errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
+            category: "unexpected_error",
+          });
         }
 
         throw new TRPCError({
