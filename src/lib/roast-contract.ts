@@ -18,6 +18,19 @@ export const MAX_DIFF_LINE_CONTENT_CHARS = 500;
 export const AI_TIMEOUT_MS = 20_000;
 
 const languageValues = codeLanguageEnum.enumValues;
+export const roastModeValues = roastModeEnum.enumValues;
+export const roastVerdictValues = roastVerdictEnum.enumValues;
+export const issueSeverityValues = issueSeverityEnum.enumValues;
+export const diffLineTypeValues = diffLineTypeEnum.enumValues;
+
+export const roastAiRequiredFieldList = [
+  "score",
+  "verdict",
+  "summaryQuote",
+  "analysisSummary",
+  "issues",
+  "diffLines",
+] as const;
 
 export const normalizeLanguageOrPlaintext = (
   language: string | null | undefined,
@@ -150,3 +163,4 @@ export const roastCreateOutputSchema = z.object({
 export type RoastCreateInput = z.infer<typeof roastCreateInputSchema>;
 export type RoastCreateRawOutput = z.infer<typeof roastAiRawOutputSchema>;
 export type RoastCreateOutput = z.infer<typeof roastCreateOutputSchema>;
+export type NormalizedRoastOutput = RoastCreateOutput;
