@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { roastDiffLines, roastIssues, roasts, submissions } from "@/db/schema";
 
@@ -102,7 +102,7 @@ export const getRoastById = async (roastId: string) => {
     })
     .from(roasts)
     .innerJoin(submissions, eq(roasts.submissionId, submissions.id))
-    .where(and(eq(roasts.id, roastId), eq(roasts.status, "completed")))
+    .where(eq(roasts.id, roastId))
     .limit(1);
 
   return rows[0] ?? null;

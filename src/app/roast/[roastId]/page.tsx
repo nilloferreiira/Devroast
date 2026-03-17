@@ -1,167 +1,182 @@
-import { notFound } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { CodeBlockDisplay } from "@/components/ui/code-block"
-import { DiffLine } from "@/components/ui/diff-line"
-import { Panel } from "@/components/ui/panel"
-import { ScoreRing } from "@/components/ui/score-ring"
-import { SectionLabelPrefix, SectionLabelRoot, SectionLabelText } from "@/components/ui/section-label"
-import { StatusBadge } from "@/components/ui/status-badge"
+import { notFound } from "next/navigation";
+import { CodeBlockDisplay } from "@/components/ui/code-block";
+import { DiffLine } from "@/components/ui/diff-line";
+import { Panel } from "@/components/ui/panel";
+import { ScoreRing } from "@/components/ui/score-ring";
+import {
+  SectionLabelPrefix,
+  SectionLabelRoot,
+  SectionLabelText,
+} from "@/components/ui/section-label";
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  getRoastById,
+  getRoastDiffLines,
+  getRoastIssues,
+} from "@/db/queries/roasts";
 
 type RoastResultPageProps = {
-	params: Promise<{
-		roastId: string
-	}>
-}
+  params: Promise<{
+    roastId: string;
+  }>;
+};
 
-type AnalysisCard = {
-	title: string
-	tone: "critical" | "warning" | "good"
-	description: string
-	suggestion: string
-}
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-const submittedCode = `function quickSort(arr) {
-  let left = []
-  let right = []
-  let pivot = arr[0]
-
-  if (arr.length <= 1) {
-    return "doesn't work"
+const resolveVerdictTone = (verdict: string | null) => {
+  if (verdict === "needs_serious_help") {
+    return "critical" as const;
   }
 
-  // this avoids the optimization
-  // and leaks memory sometimes
+  if (verdict === "needs_work" || verdict === "not_great") {
+    return "warning" as const;
+  }
 
-  return void;
-}`
+  if (verdict === "decent" || verdict === "clean") {
+    return "good" as const;
+  }
 
-const analysisCards: AnalysisCard[] = [
-	{
-		title: "critical",
-		tone: "critical",
-		description: "This function returns mixed and invalid types, which makes runtime behavior unreliable.",
-		suggestion: "Always return the same value shape and avoid impossible branches."
-	},
-	{
-		title: "warning",
-		tone: "warning",
-		description: "Recursive setup is incomplete: partition arrays are declared but never populated.",
-		suggestion: "Iterate through input and push each item into left/right before recursive calls."
-	},
-	{
-		title: "good",
-		tone: "good",
-		description: "The base case exists and prevents infinite recursion for short arrays.",
-		suggestion: "Keep this guard and add explicit typing for stronger guarantees."
-	},
-	{
-		title: "style",
-		tone: "warning",
-		description: "Comments explain symptoms but not intent, making future maintenance harder.",
-		suggestion: "Prefer concise comments that state why a decision exists."
-	}
-]
+  return "neutral" as const;
+};
 
-export default async function RoastResultPage({ params }: RoastResultPageProps) {
-	const { roastId } = await params
+const resolveIssueTone = (severity: "critical" | "warning" | "good") => {
+  return severity;
+};
 
-	if (!uuidPattern.test(roastId)) {
-		notFound()
-	}
+export default async function RoastResultPage({
+  params,
+}: RoastResultPageProps) {
+  const { roastId } = await params;
 
-	return (
-		<main className="min-h-[calc(100vh-56px)] bg-bg-page px-6 pb-14 pt-10 text-text-primary md:px-10">
-			<div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
-				<section aria-label={`roast result ${roastId}`} className="flex flex-col gap-8 lg:flex-row lg:items-center">
-					<div className="flex justify-center lg:justify-start">
-						<ScoreRing score={3.5} />
-					</div>
+  if (!uuidPattern.test(roastId)) {
+    notFound();
+  }
 
-					<div className="flex flex-1 flex-col gap-4">
-						<StatusBadge tone="critical">verdict: needs_serious_help</StatusBadge>
+  const roast = await getRoastById(roastId);
 
-						<p className="font-mono text-base leading-relaxed text-text-primary md:text-xl">
-							{'"this code looks like it was written during a power outage... in 2005."'}
-						</p>
+  if (!roast) {
+    notFound();
+  }
 
-						<div className="flex items-center gap-3 font-mono text-xs text-text-tertiary">
-							<span>lang: javascript</span>
-							<span>·</span>
-							<span>7 lines</span>
-						</div>
+  if (roast.status !== "completed") {
+    notFound();
+  }
 
-						<div>
-							<Button variant="secondary" size="sm">
-								$ share_result
-							</Button>
-						</div>
-					</div>
-				</section>
+  const [issues, diffLines] = await Promise.all([
+    getRoastIssues(roast.roastId),
+    getRoastDiffLines(roast.roastId),
+  ]);
 
-				<div className="h-px w-full bg-border-primary" />
+  const sourceLineCount = roast.sourceCode.split(/\r?\n/).length;
+  const score = Number(roast.score ?? 0);
+  const verdictLabel = roast.verdict ?? "unknown";
+  const verdictTone = resolveVerdictTone(roast.verdict);
 
-				<section className="flex flex-col gap-4">
-					<SectionLabelRoot>
-						<SectionLabelPrefix />
-						<SectionLabelText>your_submission</SectionLabelText>
-					</SectionLabelRoot>
+  return (
+    <main className="min-h-[calc(100vh-56px)] bg-bg-page px-6 pb-14 pt-10 text-text-primary md:px-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10">
+        <section
+          aria-label={`roast result ${roastId}`}
+          className="flex flex-col gap-8 lg:flex-row lg:items-center"
+        >
+          <div className="flex justify-center lg:justify-start">
+            <ScoreRing score={score} />
+          </div>
 
-					<Panel className="overflow-hidden p-0">
-						<CodeBlockDisplay
-							code={submittedCode}
-							lang="javascript"
-							withLineNumbers
-							className="min-h-90 border-0 px-4 py-4"
-						/>
-					</Panel>
-				</section>
+          <div className="flex flex-1 flex-col gap-4">
+            <StatusBadge
+              tone={verdictTone}
+            >{`verdict: ${verdictLabel}`}</StatusBadge>
 
-				<div className="h-px w-full bg-border-primary" />
+            <p className="font-mono text-base leading-relaxed text-text-primary md:text-xl">
+              {`"${roast.summaryQuote}"`}
+            </p>
 
-				<section className="flex flex-col gap-6">
-					<SectionLabelRoot>
-						<SectionLabelPrefix />
-						<SectionLabelText>detailed_analysis</SectionLabelText>
-					</SectionLabelRoot>
+            <div className="flex items-center gap-3 font-mono text-xs text-text-tertiary">
+              <span>{`lang: ${roast.language}`}</span>
+              <span>·</span>
+              <span>{`${sourceLineCount} lines`}</span>
+            </div>
+          </div>
+        </section>
 
-					<div className="grid gap-5 md:grid-cols-2">
-						{analysisCards.map((card) => (
-							<Panel key={card.title} className="flex h-full flex-col gap-3 p-5">
-								<StatusBadge tone={card.tone}>{card.title}</StatusBadge>
-								<p className="text-sm text-text-secondary">{card.description}</p>
-								<p className="font-mono text-xs text-text-tertiary">{`suggestion: ${card.suggestion}`}</p>
-							</Panel>
-						))}
-					</div>
-				</section>
+        <div className="h-px w-full bg-border-primary" />
 
-				<div className="h-px w-full bg-border-primary" />
+        <section className="flex flex-col gap-4">
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>your_submission</SectionLabelText>
+          </SectionLabelRoot>
 
-				<section className="flex flex-col gap-6">
-					<SectionLabelRoot>
-						<SectionLabelPrefix />
-						<SectionLabelText>suggested_fix</SectionLabelText>
-					</SectionLabelRoot>
+          <Panel className="overflow-hidden p-0">
+            <CodeBlockDisplay
+              code={roast.sourceCode}
+              lang={roast.language}
+              withLineNumbers
+              className="min-h-90 border-0 px-4 py-4"
+            />
+          </Panel>
+        </section>
 
-					<Panel className="overflow-hidden p-0">
-						<div className="flex h-10 items-center border-b border-border-primary px-4 font-mono text-xs text-text-secondary">
-							your_code.ts -&gt; improved_code.ts
-						</div>
+        <div className="h-px w-full bg-border-primary" />
 
-						<div className="py-1">
-							<DiffLine tone="context" code="function quickSort(arr) {" className="h-7" />
-							<DiffLine tone="removed" code="  let left = []" className="h-7" />
-							<DiffLine tone="removed" code="  let right = []" className="h-7" />
-							<DiffLine tone="removed" code={'  if (arr.length <= 1) return "doesn\'t work"'} className="h-7" />
-							<DiffLine tone="added" code="  const left = []; const right = [];" className="h-7" />
-							<DiffLine tone="added" code="  if (arr.length <= 1) return arr;" className="h-7" />
-							<DiffLine tone="context" code="}" className="h-7" />
-						</div>
-					</Panel>
-				</section>
-			</div>
-		</main>
-	)
+        <section className="flex flex-col gap-6">
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>detailed_analysis</SectionLabelText>
+          </SectionLabelRoot>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <Panel className="flex h-full flex-col gap-3 p-5 md:col-span-2">
+              <StatusBadge tone="neutral">summary</StatusBadge>
+              <p className="text-sm text-text-secondary">
+                {roast.analysisSummary}
+              </p>
+            </Panel>
+
+            {issues.map((issue) => (
+              <Panel key={issue.id} className="flex h-full flex-col gap-3 p-5">
+                <StatusBadge tone={resolveIssueTone(issue.severity)}>
+                  {issue.severity}
+                </StatusBadge>
+                <p className="font-mono text-xs text-text-primary">
+                  {issue.title}
+                </p>
+                <p className="text-sm text-text-secondary">
+                  {issue.description}
+                </p>
+              </Panel>
+            ))}
+          </div>
+        </section>
+
+        <div className="h-px w-full bg-border-primary" />
+
+        <section className="flex flex-col gap-6">
+          <SectionLabelRoot>
+            <SectionLabelPrefix />
+            <SectionLabelText>suggested_fix</SectionLabelText>
+          </SectionLabelRoot>
+
+          <Panel className="overflow-hidden p-0">
+            <div className="flex h-10 items-center border-b border-border-primary px-4 font-mono text-xs text-text-secondary">
+              your_code.ts -&gt; improved_code.ts
+            </div>
+
+            <div className="py-1">
+              {diffLines.map((line) => (
+                <DiffLine
+                  key={line.id}
+                  tone={line.lineType}
+                  code={line.content}
+                  className="h-7"
+                />
+              ))}
+            </div>
+          </Panel>
+        </section>
+      </div>
+    </main>
+  );
 }

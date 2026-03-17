@@ -17,6 +17,10 @@ type CodeEditorProps = {
   initialTokenLines: CodeTokenLinesPayload;
   maxChars: number;
   onLimitChange?: (isOverLimit: boolean) => void;
+  onEditorStateChange?: (state: {
+    code: string;
+    language: CodeLanguageOrPlaintext;
+  }) => void;
 };
 
 const insertAtCursor = (
@@ -49,6 +53,7 @@ export const CodeEditor = ({
   initialTokenLines,
   maxChars,
   onLimitChange,
+  onEditorStateChange,
 }: CodeEditorProps) => {
   const highlightRef = useRef<HTMLPreElement>(null);
   const [code, setCode] = useState(initialCode);
@@ -117,6 +122,13 @@ export const CodeEditor = ({
   useEffect(() => {
     onLimitChange?.(isOverLimit);
   }, [isOverLimit, onLimitChange]);
+
+  useEffect(() => {
+    onEditorStateChange?.({
+      code,
+      language: effectiveLanguage,
+    });
+  }, [code, effectiveLanguage, onEditorStateChange]);
 
   return (
     <CodeBlockRoot>
