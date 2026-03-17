@@ -40,10 +40,6 @@ const resolveVerdictTone = (verdict: string | null) => {
   return "neutral" as const;
 };
 
-const resolveIssueTone = (severity: "critical" | "warning" | "good") => {
-  return severity;
-};
-
 export default async function RoastResultPage({
   params,
 }: RoastResultPageProps) {
@@ -137,7 +133,7 @@ export default async function RoastResultPage({
 
             {issues.map((issue) => (
               <Panel key={issue.id} className="flex h-full flex-col gap-3 p-5">
-                <StatusBadge tone={resolveIssueTone(issue.severity)}>
+                <StatusBadge tone={issue.severity}>
                   {issue.severity}
                 </StatusBadge>
                 <p className="font-mono text-xs text-text-primary">

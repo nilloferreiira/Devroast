@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import type { CodeTokenLinesPayload } from "@/lib/code-highlight";
 import type { CodeLanguageOrPlaintext } from "@/lib/code-languages";
+import { detectLanguage } from "@/lib/detect-language";
 
 type EditorPanelProps = {
   initialCode: string;
@@ -24,11 +25,21 @@ export const EditorPanel = ({
   const createRoastMutation = useCreateRoastAction();
   const [isOverLimit, setIsOverLimit] = useState(initialCode.length > maxChars);
   const [code, setCode] = useState(initialCode);
-  const [language, setLanguage] =
-    useState<CodeLanguageOrPlaintext>("plaintext");
+  const [language, setLanguage] = useState<CodeLanguageOrPlaintext>(() =>
+    detectLanguage(initialCode),
+  );
   const [isRoastMode, setIsRoastMode] = useState(false);
 
-  const submitError = createRoastMutation.error?.message;
+  const submitErrorCode =
+    createRoastMutation.error && "data" in createRoastMutation.error
+      ? (createRoastMutation.error.data?.code ?? null)
+      : null;
+  const submitError =
+    submitErrorCode === "BAD_REQUEST"
+      ? "input looks invalid. please review your code and try again."
+      : createRoastMutation.error
+        ? "roast failed. please retry in a few seconds."
+        : null;
 
   const handleSubmit = () => {
     if (isOverLimit || createRoastMutation.isPending) {
