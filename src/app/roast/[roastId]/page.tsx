@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CodeBlockDisplay } from "@/components/ui/code-block";
 import { DiffLine } from "@/components/ui/diff-line";
@@ -14,6 +15,7 @@ import {
   getRoastDiffLines,
   getRoastIssues,
 } from "@/db/queries/roasts";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 type RoastResultPageProps = {
   params: Promise<{
@@ -39,6 +41,39 @@ const resolveVerdictTone = (verdict: string | null) => {
 
   return "neutral" as const;
 };
+
+export async function generateMetadata({
+  params,
+}: RoastResultPageProps): Promise<Metadata> {
+  const { roastId } = await params;
+
+  if (!uuidPattern.test(roastId)) return {};
+
+  const roast = await getRoastById(roastId);
+
+  if (!roast || roast.status !== "completed") return {};
+
+  const score = Number(roast.score ?? 0);
+  const title = `DevRoast: ${score}/10 — ${roast.verdict}`;
+  const description = roast.summaryQuote ?? "Code has been roasted.";
+  const ogImageUrl = `${getBaseUrl()}/api/og/${roastId}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default async function RoastResultPage({
   params,
