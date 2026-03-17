@@ -29,6 +29,7 @@ type RoastCreateEvent =
   | "roast.create.unexpected_error";
 
 type RoastCreateWarningEvent = "roast.create.failure_persist_warning";
+type RoastCreateWarningNoopEvent = "roast.create.failure_persist_noop";
 
 const logRoastCreate = (
   event: RoastCreateEvent,
@@ -38,7 +39,7 @@ const logRoastCreate = (
 };
 
 const logRoastCreateWarning = (
-  event: RoastCreateWarningEvent,
+  event: RoastCreateWarningEvent | RoastCreateWarningNoopEvent,
   metadata: Record<string, string>,
 ) => {
   console.warn(event, metadata);
@@ -82,10 +83,10 @@ type RoastCreateDeps = {
   markRoastAsFailed: (
     roastId: string,
     errorMessage: string,
-  ) => Promise<unknown>;
+  ) => Promise<{ id: string } | null>;
   logEvent: (event: RoastCreateEvent, metadata: Record<string, string>) => void;
   logWarning: (
-    event: RoastCreateWarningEvent,
+    event: RoastCreateWarningEvent | RoastCreateWarningNoopEvent,
     metadata: Record<string, string>,
   ) => void;
 };
@@ -110,14 +111,23 @@ export const createRoastCreateMutationHandler = (
   const safeMarkRoastAsFailed = async (input: {
     roastId: string;
     errorMessage: string;
-    category: "db_commit" | "adapter_error" | "unexpected_error";
+    cause: "db_commit" | "adapter_error" | "unexpected_error";
   }) => {
     try {
-      await resolvedDeps.markRoastAsFailed(input.roastId, input.errorMessage);
+      const result = await resolvedDeps.markRoastAsFailed(
+        input.roastId,
+        input.errorMessage,
+      );
+      if (!result) {
+        resolvedDeps.logWarning("roast.create.failure_persist_noop", {
+          roastId: input.roastId,
+          cause: input.cause,
+        });
+      }
     } catch {
       resolvedDeps.logWarning("roast.create.failure_persist_warning", {
         roastId: input.roastId,
-        category: input.category,
+        cause: input.cause,
       });
     }
   };
@@ -165,7 +175,7 @@ export const createRoastCreateMutationHandler = (
         await safeMarkRoastAsFailed({
           roastId,
           errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
-          category: "db_commit",
+          cause: "db_commit",
         });
 
         throw new TRPCError({
@@ -189,7 +199,7 @@ export const createRoastCreateMutationHandler = (
           await safeMarkRoastAsFailed({
             roastId,
             errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
-            category: "adapter_error",
+            cause: "adapter_error",
           });
         }
 
@@ -216,7 +226,7 @@ export const createRoastCreateMutationHandler = (
         await safeMarkRoastAsFailed({
           roastId,
           errorMessage: INTERNAL_RETRY_SAFE_MESSAGE,
-          category: "unexpected_error",
+          cause: "unexpected_error",
         });
       }
 

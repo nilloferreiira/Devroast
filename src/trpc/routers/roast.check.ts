@@ -104,6 +104,39 @@ const run = async () => {
   }
 
   {
+    const warnings: string[] = [];
+
+    const handler = createRoastCreateMutationHandler({
+      createSubmissionWithProcessingRoast: async () => ({
+        submissionId: "sub-2b",
+        roastId: "roast-2b",
+      }),
+      generateRoastAnalysis: async () => {
+        throw new RoastAdapterError("provider_timeout", "provider timeout");
+      },
+      completeRoastWithDetails: async () => undefined,
+      markRoastAsFailed: async () => null,
+      logEvent: () => undefined,
+      logWarning: (event) => {
+        warnings.push(event);
+      },
+    });
+
+    let captured: unknown;
+    try {
+      await handler(baseInput);
+    } catch (error) {
+      captured = error;
+    }
+
+    assertInternalServerError(captured, "failure persist noop path");
+    assert(
+      warnings.includes("roast.create.failure_persist_noop"),
+      "failure persist noop event is emitted",
+    );
+  }
+
+  {
     const events: string[] = [];
 
     const handler = createRoastCreateMutationHandler({
