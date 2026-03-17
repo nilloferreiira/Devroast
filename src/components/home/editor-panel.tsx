@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CodeEditor } from "@/components/home/code-editor";
 import { useCreateRoastAction } from "@/components/home/create-roast-action";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,14 @@ export const EditorPanel = ({
         ? "roast failed. please retry in a few seconds."
         : null;
 
+  const handleEditorStateChange = useCallback(
+    (state: { code: string; language: CodeLanguageOrPlaintext }) => {
+      setCode(state.code);
+      setLanguage(state.language);
+    },
+    [],
+  );
+
   const handleSubmit = () => {
     if (isOverLimit || createRoastMutation.isPending) {
       return;
@@ -67,10 +75,7 @@ export const EditorPanel = ({
         initialTokenLines={initialTokenLines}
         maxChars={maxChars}
         onLimitChange={setIsOverLimit}
-        onEditorStateChange={(state) => {
-          setCode(state.code);
-          setLanguage(state.language);
-        }}
+        onEditorStateChange={handleEditorStateChange}
       />
 
       <section className="flex flex-wrap items-center justify-between gap-4">
@@ -101,9 +106,7 @@ export const EditorPanel = ({
           </Button>
 
           {submitError ? (
-            <p className="text-xs text-accent-red">
-              roast failed. please retry in a few seconds.
-            </p>
+            <p className="text-xs text-accent-red">{submitError}</p>
           ) : null}
         </div>
       </section>
