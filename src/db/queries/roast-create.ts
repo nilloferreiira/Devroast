@@ -79,6 +79,51 @@ export const createProcessingRoastRecord = async (input: {
   return createdRoast;
 };
 
+export const createSubmissionWithProcessingRoast = async (input: {
+  sourceCode: string;
+  language: CodeLanguage;
+  roastMode: RoastMode;
+}) => {
+  const db = getDb();
+
+  return db.transaction(async (tx) => {
+    const [createdSubmission] = await tx
+      .insert(submissions)
+      .values({
+        sourceCode: input.sourceCode,
+        language: input.language,
+        roastMode: input.roastMode,
+        lineCount: toLineCount(input.sourceCode),
+      })
+      .returning({
+        id: submissions.id,
+      });
+
+    if (!createdSubmission) {
+      throw new Error("Failed to create submission record");
+    }
+
+    const [createdRoast] = await tx
+      .insert(roasts)
+      .values({
+        submissionId: createdSubmission.id,
+        status: "processing",
+      })
+      .returning({
+        id: roasts.id,
+      });
+
+    if (!createdRoast) {
+      throw new Error("Failed to create processing roast record");
+    }
+
+    return {
+      submissionId: createdSubmission.id,
+      roastId: createdRoast.id,
+    };
+  });
+};
+
 export const completeRoastWithDetails = async (input: {
   roastId: string;
   score: number;

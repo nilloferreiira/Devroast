@@ -9,6 +9,7 @@ export {
   completeRoastWithDetails,
   createProcessingRoastRecord,
   createSubmissionRecord,
+  createSubmissionWithProcessingRoast,
   markRoastAsFailed,
 } from "@/db/queries/roast-create";
 export {
