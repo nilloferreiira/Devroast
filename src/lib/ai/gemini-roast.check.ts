@@ -1,7 +1,9 @@
 import {
+  type RoastAdapterErrorCategory,
   RoastAdapterError,
   generateRoastAnalysis,
 } from "./gemini-roast";
+import { AI_TIMEOUT_MS } from "@/lib/roast-contract";
 
 const assert = (condition: unknown, message: string) => {
   if (!condition) {
@@ -11,7 +13,7 @@ const assert = (condition: unknown, message: string) => {
 
 const assertRejectsAdapterCategory = async (
   fn: () => Promise<unknown>,
-  expectedCategory: RoastAdapterError["category"],
+  expectedCategory: RoastAdapterErrorCategory,
   message: string,
 ) => {
   let captured: unknown;
@@ -56,6 +58,10 @@ const run = async () => {
   assert(
     normalCallInputs[0]?.prompt.includes("serious and objective"),
     "normal mode prompt should request serious/objective tone",
+  );
+  assert(
+    normalCallInputs[0]?.timeoutMs === AI_TIMEOUT_MS,
+    "adapter should pass AI_TIMEOUT_MS to injected transport",
   );
 
   const roastCallInputs: { prompt: string; timeoutMs: number }[] = [];
@@ -111,6 +117,30 @@ const run = async () => {
       ),
     "parse_error",
     "malformed provider JSON should be parse_error",
+  );
+
+  await assertRejectsAdapterCategory(
+    () =>
+      generateRoastAnalysis(
+        {
+          code: "const value = 1;",
+          roastMode: "normal",
+          language: "typescript",
+        },
+        {
+          callModel: async () =>
+            JSON.stringify({
+              score: 8,
+              verdict: "invalid_verdict",
+              summaryQuote: "Not valid output",
+              analysisSummary: "Enum value does not match schema.",
+              issues: [],
+              diffLines: [],
+            }),
+        },
+      ),
+    "parse_error",
+    "structurally invalid provider JSON should be parse_error",
   );
 
   await assertRejectsAdapterCategory(

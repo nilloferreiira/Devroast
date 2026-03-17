@@ -11,7 +11,7 @@ import {
   type NormalizedRoastOutput,
 } from "@/lib/roast-contract";
 
-type RoastAdapterErrorCategory =
+export type RoastAdapterErrorCategory =
   | "provider_timeout"
   | "provider_error"
   | "parse_error";
@@ -191,7 +191,10 @@ const parseNormalizedOutput = (rawText: string): NormalizedRoastOutput => {
 };
 
 // Adapter safety rule: no lifecycle/event logging here (especially request IDs).
-// Router/application layer owns event categorization and observability wiring.
+// Router/application layer owns observability and event categorization:
+// - roast.create.provider_timeout
+// - roast.create.provider_error
+// - roast.create.parse_error
 export const generateRoastAnalysis = async (
   params: {
     code: string;
