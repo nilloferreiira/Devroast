@@ -39,6 +39,7 @@ src/
     JetBrainsMono-Bold.ttf
     JetBrainsMono-ExtraBold.ttf
   lib/
+    get-base-url.ts                # Shared getBaseUrl() utility (server-safe)
     og/og-image.tsx                # <OgImage> component (JSX)
     og/og-colors.ts                # Verdict color mapping utility
 next.config.ts                     # Add serverExternalPackages
@@ -53,9 +54,10 @@ next.config.ts                     # Add serverExternalPackages
 Add `"@takumi-rs/core"` to `serverExternalPackages` so Next.js does not bundle the native binary:
 
 ```ts
-// next.config.ts
-export const config = {
+// next.config.ts — merge into existing nextConfig object
+const nextConfig: NextConfig = {
   serverExternalPackages: ["@takumi-rs/core"],
+  // ...existing config
 };
 ```
 
@@ -65,9 +67,12 @@ export const config = {
 
 1. Validate `roastId` is a valid UUID (regex), return 400 if not
 2. Fetch roast via `getRoastById(roastId)` (existing DB query)
-3. Return 404 if roast not found or `status !== "completed"`
-4. Render `<OgImage>` component with roast data
-5. Return `new ImageResponse(jsx, { width: 1200, height: 630, fonts })`
+3. Return 404 if roast not found, `status !== "completed"`, or `verdict` is null
+4. Coerce `roast.score` from `string | null` to `number` via `Number(roast.score ?? 0)` (Drizzle returns `numeric` columns as strings)
+5. Compute `lineCount` as `roast.sourceCode.split(/\r?\n/).length`
+6. Use `roast.summaryQuote ?? "No summary available."` as fallback for null quotes
+7. Render `<OgImage>` component with the prepared props
+8. Return `new ImageResponse(jsx, { width: 1200, height: 630, fonts })`
 
 ### Caching
 
@@ -85,9 +90,9 @@ Node.js (default for Next.js route handlers). Takumi's native binary requires No
 Container (1200x630, bg: #0A0A0A, flexbox column, centered, padding: 64px, gap: 28px)
 ├── Logo Row (flex row, gap: 8px, vertically centered)
 │   ├── ">" text (JetBrains Mono, 24px, bold 700, color: #10B981)
-│   └── "devroast" text (JetBrains Mono, 20px, medium 500, color: #E5E5E5)
+│   └── "devroast" text (JetBrains Mono, 20px, regular 400, color: #E5E5E5)
 ├── Score Row (flex row, baseline-aligned, gap: 4px)
-│   ├── "{score}" text (JetBrains Mono, 160px, weight 900, dynamic color)
+│   ├── "{score}" text (JetBrains Mono, 160px, weight 800, dynamic color)
 │   └── "/10" text (JetBrains Mono, 56px, normal 400, color: #4B5563)
 ├── Verdict Row (flex row, gap: 8px, vertically centered)
 │   ├── Dot (12x12 circle, dynamic color fill)
@@ -138,7 +143,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!roast || roast.status !== "completed") return {};
 
   const title = `DevRoast: ${roast.score}/10 — ${roast.verdict}`;
-  const description = roast.summaryQuote;
+  const description = roast.summaryQuote ?? "Code has been roasted.";
   const ogImageUrl = `${getBaseUrl()}/api/og/${roastId}`;
 
   return {
@@ -159,7 +164,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 ```
 
-Uses the existing `getBaseUrl()` pattern from `src/trpc/client.tsx` for absolute URL construction.
+Extract a `getBaseUrl()` utility into `src/lib/get-base-url.ts` following the same logic as the private function in `src/trpc/client.tsx`. The existing function is module-private and lives in a `"use client"` file, so it cannot be imported by server code. The new utility is server-safe and shared.
+
+**Note on duplicate DB queries:** `generateMetadata` and the page component both call `getRoastById`. Next.js does not deduplicate raw DB calls (only `fetch`). Wrap `getRoastById` with React's `cache()` to deduplicate within a single request.
 
 ### Base URL resolution
 
@@ -175,9 +182,11 @@ Bundle JetBrains Mono `.ttf` files in `src/assets/fonts/`. Load them in the rout
 const fonts = [
   { name: "JetBrains Mono", data: regularFont, weight: 400 as const },
   { name: "JetBrains Mono", data: boldFont, weight: 700 as const },
-  { name: "JetBrains Mono", data: extraBoldFont, weight: 900 as const },
+  { name: "JetBrains Mono", data: extraBoldFont, weight: 800 as const },
 ];
 ```
+
+Note: JetBrains Mono's heaviest weight is ExtraBold at 800. There is no weight 900.
 
 Font files are loaded once and cached in module scope (Node.js module caching handles this naturally).
 
